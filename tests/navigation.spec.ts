@@ -25,4 +25,30 @@ test.describe('HRM navigation bar', () => {
         await expect(currentMenuItems).toEqual(expectedMenuItems)
         await expect(currentMenuItems[0]).toBe(expectedMenuItems[0])
     })
+
+    test('Navigate through left menu options', async ({ page }) => {
+        const menuItems = page.getByLabel('Sidepanel').getByRole('listitem')
+        const currentMenuItemsCount = await menuItems.count()
+
+        for (let i = 0; i < currentMenuItemsCount; i++) {
+            const menuItem = menuItems.nth(i)
+            const menuText = await menuItem.innerText()
+
+            console.log(`Current menu item: ${menuText}`)
+
+            if (menuText !== "Maintenance") {
+                await menuItem.click()
+            }
+            else {
+                await page.goBack()
+            }
+
+            /* Possible alternative to the above if-else statement:
+            if (menuText === 'Maintenance') {
+                continue
+            }
+            await menuItem.click()
+            */
+        }
+    })
 })
