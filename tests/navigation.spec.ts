@@ -51,4 +51,87 @@ test.describe('HRM navigation bar', () => {
             */
         }
     })
+
+    test('Check all the qualifications links', async ({ page }) => {
+
+        const expectedPages = [
+            {
+                menu: 'Skills',
+                url: '/web/index.php/admin/viewSkills'
+            },
+            {
+                menu: 'Education',
+                url: '/web/index.php/admin/viewEducation'
+            },
+            {
+                menu: 'Licenses',
+                url: '/web/index.php/admin/viewLicenses'
+            }
+        ]
+
+        await page.getByRole('link', { name: 'Admin' }).click()
+        await page.getByRole('navigation', { name: 'Topbar menu' }).getByText('Qualifications').click()
+
+        const qualificationOptions = page.getByRole('menu').locator('li')
+
+        for (let expectedPage of expectedPages) {
+            const menuOption = qualificationOptions.filter({ hasText: expectedPage.menu })
+
+            await menuOption.click()
+            await expect(page).toHaveURL(new RegExp(expectedPage.url))
+            await page.getByRole('navigation', { name: 'Topbar menu' }).getByText('Qualifications').click()
+        }
+    })
+
+    test('Check all the configuration links', async ({ page }) => {
+
+        const expectedPages = [
+            {
+                menu: 'Email Configuration',
+                url: '/web/index.php/admin/listMailConfiguration'
+            },
+            {
+                menu: 'Email Subscriptions',
+                url: '/web/index.php/admin/viewEmailNotification'
+            },
+            {
+                menu: 'Localization',
+                url: '/web/index.php/admin/localization'
+            },
+            {
+                menu: 'Language Packages',
+                url: '/web/index.php/admin/languagePackage'
+            },
+            {
+                menu: 'Modules',
+                url: '/web/index.php/admin/viewModules'
+            },
+            {
+                menu: 'Social Media Authentication',
+                url: '/web/index.php/admin/openIdProvider'
+            },
+            {
+                menu: 'Register OAuth Client',
+                url: '/web/index.php/admin/registerOAuthClient'
+            },
+            {
+                menu: 'LDAP Configuration',
+                url: '/web/index.php/admin/ldapConfiguration'
+            }
+        ]
+
+        await page.getByRole('link', { name: 'Admin' }).click()
+        await page.getByRole('navigation', { name: 'Topbar menu' }).getByText('Configuration').click()
+
+        const configurationOptions = page.getByRole('menu').locator('li')
+
+        for (let expectedPage of expectedPages) {
+            const menuOption = configurationOptions.filter({ hasText: expectedPage.menu })
+
+            await menuOption.click()
+            await expect(page).toHaveURL(new RegExp(expectedPage.url))
+            await page.getByRole('navigation', { name: 'Topbar menu' }).getByText('Configuration').click()
+        }
+
+    })
 })
