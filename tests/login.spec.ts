@@ -1,13 +1,21 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pageobjects/loginPage';
+import { SideMenuOption, SidePanel } from '../components/SidePanel';
 
 test.describe('HRM Login Tests', () => {
     test('Login to HRM', async ({ page }) => {
+
         const loginPage = new LoginPage(page)
         await loginPage.doLogin('Admin', 'admin123')
-        await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible()
 
-        await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible();
+        const sidePanel = new SidePanel(page)
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
+        await sidePanel.clickOnOption(SideMenuOption.BUZZ)
+        await sidePanel.clickOnOption(SideMenuOption.DASHBOARD)
+
+
+        await sidePanel.searchAnOption(SideMenuOption.ADMIN)
+        await expect(sidePanel.listOptions(SideMenuOption.ADMIN)).toBeVisible()
     })
 
     // Negative test cases
