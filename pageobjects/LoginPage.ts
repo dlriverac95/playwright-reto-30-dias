@@ -1,4 +1,5 @@
 import { Page, Locator } from "@playwright/test";
+import { Environment } from "../config/Environment";
 
 export class LoginPage {
 
@@ -20,4 +21,14 @@ export class LoginPage {
         await this.passwordInput.fill(password)
         await this.loginButton.click()  
     }
+
+    async loginAsAdmin(){
+        await this.doLogin(Environment.ADMIN_USERNAME, Environment.ADMIN_PASSWORD)
+    }
+
+    async loginAsEss(){
+        await this.doLogin(Environment.ESS_USERNAME, Environment.ESS_PASSWORD)
+    }
+
+
 }

@@ -3,19 +3,27 @@ import { LoginPage } from '../pageobjects/loginPage';
 import { SideMenuOption, SidePanel } from '../components/SidePanel';
 
 test.describe('HRM Login Tests', () => {
-    test('Login to HRM', async ({ page }) => {
-
+    test('Login to HRM as a admin', async ({ page }) => {
         const loginPage = new LoginPage(page)
-        await loginPage.doLogin('Admin', 'admin123')
+        await loginPage.loginAsAdmin()
 
         const sidePanel = new SidePanel(page)
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
         await sidePanel.clickOnOption(SideMenuOption.BUZZ)
         await sidePanel.clickOnOption(SideMenuOption.DASHBOARD)
 
-
         await sidePanel.searchAnOption(SideMenuOption.ADMIN)
         await expect(sidePanel.listOptions(SideMenuOption.ADMIN)).toBeVisible()
+    })
+
+    test('Login to HRM as a ESS', async ({ page }) => {
+        const loginPage = new LoginPage(page)
+        await loginPage.loginAsEss()
+
+        const sidePanel = new SidePanel(page)
+        await expect(page.getByRole('link', { name: 'Admin' })).not.toBeVisible()
+        await sidePanel.clickOnOption(SideMenuOption.BUZZ)
+        await sidePanel.clickOnOption(SideMenuOption.DASHBOARD)
     })
 
     // Negative test cases
