@@ -1,12 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pageobjects/loginPage';
+import { SidePanel, SideMenuOption } from "../components/SidePanel";
 
 
 test.describe('HRM users table', () => {
     test.beforeEach(async ({ page }) => {
         const loginPage = new LoginPage(page)
-        await loginPage.doLogin('Admin', 'admin123')
-        await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible()
+        await loginPage.loginAsAdmin()
+        const sidePanel = new SidePanel(page)
+        await expect(sidePanel.listOptions(SideMenuOption.ADMIN)).toBeVisible()
     });
 
     test('Get all the usernames registered', async ({ page }) => {
@@ -78,5 +80,33 @@ test.describe('HRM users table', () => {
         await expect(usernameInput).toHaveValue(selectedUsername);
         console.log(`Selected user for editing: ${selectedUsername}`);
         console.log(`Username input value: ${await usernameInput.inputValue()}`);
+    });
+
+    test('Check user role options', async ({ page }) => {
+        const expectedRoleOptions = ['-- Select --', 'Admin', 'ESS']
+
+        const sidePanel = new SidePanel(page)
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
+
+        await page.locator("//label[contains(.,'User Role')]/parent::div/following-sibling::div").click()
+        const currentUserRoleOptions = await page.getByRole('listbox').getByRole('option').allInnerTexts()
+        
+        console.log(currentUserRoleOptions)
+        expect(currentUserRoleOptions,
+            'The options displayed in the User Role Dropdown do not match the expected options.').toEqual(expectedRoleOptions)
+    });
+
+    test('Check status options', async ({ page }) => {
+        const expectedStatusOptions = ['-- Select --', 'Enabled', 'Disabled']
+
+        const sidePanel = new SidePanel(page)
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
+
+        await page.locator("//label[contains(., 'Status')]/parent::div/following-sibling::div").click()
+        const currentUserStatusOptions = await page.getByRole('listbox').getByRole('option').allInnerTexts()
+        
+        console.log(currentUserStatusOptions)
+        expect(currentUserStatusOptions, 
+            'The options displayed in the Status Dropdown do not match the expected options.').toEqual(expectedStatusOptions)
     });
 });
