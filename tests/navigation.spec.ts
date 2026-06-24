@@ -1,11 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pageobjects/loginPage';
+import { TopBarMenu } from '../components/top-bar-menu/TopBarMenu';
+import { SideMenuOption, SidePanel } from "../components/SidePanel";
 
 test.describe('HRM navigation bar', () => {
     test.beforeEach(async ({ page }) => {
         const loginPage = new LoginPage(page)
-        await loginPage.doLogin('Admin', 'admin123')
-        await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible()
+        await loginPage.loginAsAdmin()
+        const sidePanel = new SidePanel(page)
+        await expect(sidePanel.listOptions(SideMenuOption.ADMIN)).toBeVisible()
     })
 
     test('Check left menu options', async ({ page }) => {
@@ -133,4 +136,20 @@ test.describe('HRM navigation bar', () => {
         }
 
     })
+
+    test('Check top bar menu options', async ({ page }) => {        
+        const sidePanel = new SidePanel(page)
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
+
+        const topBarMenu = new TopBarMenu(page)
+        await topBarMenu.userManagment.clickOnUsers()
+        await topBarMenu.job.clickOnJobTitles()
+        await topBarMenu.job.clickOnPayGrades()
+        await topBarMenu.organization.clickOnGeneralInformation()
+        await topBarMenu.organization.clickOnLocations()
+        await topBarMenu.qualifications.clickOnSkills()
+        await topBarMenu.qualifications.clickOnEducation()
+
+    })
+
 })
