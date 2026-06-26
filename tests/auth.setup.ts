@@ -13,7 +13,7 @@ setup('authentication as Admin', async ({ page }) => {
 
     console.log('Authentication completed and state saved.')
 })
-
+/*
 setup('authentication as Employee', async ({ page }) => {
     const loginPage = new LoginPage(page)
     await loginPage.loginAsEss()
@@ -26,3 +26,4 @@ setup('authentication as Employee', async ({ page }) => {
 
     console.log('Authentication completed and state saved.')
 })
+*/
