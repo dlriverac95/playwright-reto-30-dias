@@ -90,7 +90,7 @@ test.describe('HRM users table', () => {
 
         await page.locator("//label[contains(.,'User Role')]/parent::div/following-sibling::div").click()
         const currentUserRoleOptions = await page.getByRole('listbox').getByRole('option').allInnerTexts()
-        
+
         console.log(currentUserRoleOptions)
         expect(currentUserRoleOptions,
             'The options displayed in the User Role Dropdown do not match the expected options.').toEqual(expectedRoleOptions)
@@ -104,9 +104,45 @@ test.describe('HRM users table', () => {
 
         await page.locator("//label[contains(., 'Status')]/parent::div/following-sibling::div").click()
         const currentUserStatusOptions = await page.getByRole('listbox').getByRole('option').allInnerTexts()
-        
+
         console.log(currentUserStatusOptions)
-        expect(currentUserStatusOptions, 
+        expect(currentUserStatusOptions,
             'The options displayed in the Status Dropdown do not match the expected options.').toEqual(expectedStatusOptions)
     });
+
+    test('Filter by user admin', async ({ page }) => {
+        const sidePanel = new SidePanel(page)
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
+        
+        //Esperar carga de la tabla
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
+
+        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+
+        //Filas que contienen el role admin
+        const currentAdminRows = allBodyRows.filter({
+            has: page.getByRole('cell').nth(2).getByText('Admin')
+        })
+
+        const expectedAdminCount = await currentAdminRows.count()
+        console.log('Admin users before filtering: ', expectedAdminCount)
+        
+        // Aplicar filtro
+        await page.locator("//label[contains(.,'User Role')]/parent::div/following-sibling::div").click()
+        await page.getByRole('listbox').getByRole('option', {name: 'Admin'}).click()
+        await page.getByRole('button', {name: 'Search'}).click()
+
+        //Esperar recarga de la tabla
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
+
+        //La tabla filtrada deberia tener exactamente la misma cantiadad que encontramos
+        const adminRowsAfterFiltering = allBodyRows.filter({
+            has: page.getByRole('cell').nth(2).getByText('Admin')
+        })
+        const adminCount = await adminRowsAfterFiltering.count()
+        console.log('Admin users after filtering: ', adminCount)
+
+        await expect(expectedAdminCount).toEqual(adminCount)
+
+    })
 });
