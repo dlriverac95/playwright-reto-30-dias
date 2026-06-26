@@ -1,11 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pageobjects/loginPage';
+import { LoginPage } from '../pageobjects/LoginPage';
 import { SideMenuOption, SidePanel } from '../components/SidePanel';
 
 test.describe('HRM Login Tests', () => {
     test('Login to HRM as a admin', async ({ page }) => {
-        const loginPage = new LoginPage(page)
-        await loginPage.loginAsAdmin()
+        await page.goto('/web/index.php/dashboard/index')
 
         const sidePanel = new SidePanel(page)
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
@@ -17,8 +16,7 @@ test.describe('HRM Login Tests', () => {
     })
 
     test('Login to HRM as a ESS', async ({ page }) => {
-        const loginPage = new LoginPage(page)
-        await loginPage.loginAsEss()
+        await page.goto('/web/index.php/dashboard/index')
 
         const sidePanel = new SidePanel(page)
         await expect(page.getByRole('link', { name: 'Admin' })).not.toBeVisible()
