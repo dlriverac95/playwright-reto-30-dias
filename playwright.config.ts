@@ -37,7 +37,7 @@ export default defineConfig({
   projects: [
     {
       name: 'setup',
-      testMatch: /.*\.setup\.ts/,
+      testMatch: /.*\.setup\.ts/
     },
 
     {
@@ -45,7 +45,7 @@ export default defineConfig({
       dependencies: ['setup'],
       use: {
          ...devices['Desktop Chrome'],
-        storageState: '.auth/admin.json',},
+        storageState: '.auth/admin.json'},
     },
     /*
     {
