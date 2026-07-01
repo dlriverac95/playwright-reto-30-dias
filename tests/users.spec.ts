@@ -1,16 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pageobjects/loginPage';
 import { SidePanel, SideMenuOption } from "../components/SidePanel";
+import { UserManagmentMenu } from '../components/top-bar-menu/UserManagmentMenu';
 
 
 test.describe('HRM users table', () => {
+    /*
     test.beforeEach(async ({ page }) => {
         const loginPage = new LoginPage(page)
         await loginPage.loginAsAdmin()
         const sidePanel = new SidePanel(page)
         await expect(sidePanel.listOptions(SideMenuOption.ADMIN)).toBeVisible()
     });
-
+    */
     test('Get all the usernames registered', async ({ page }) => {
         await page.getByRole('link', { name: 'Admin' }).click()
         await page.getByRole('navigation', { name: 'Topbar Menu' }).getByText('User Management').click()
@@ -113,7 +115,7 @@ test.describe('HRM users table', () => {
     test('Filter by user admin', async ({ page }) => {
         const sidePanel = new SidePanel(page)
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
-        
+
         //Esperar carga de la tabla
         await expect(page.locator('.oxd-table-card').first()).toBeVisible()
 
@@ -126,11 +128,11 @@ test.describe('HRM users table', () => {
 
         const expectedAdminCount = await currentAdminRows.count()
         console.log('Admin users before filtering: ', expectedAdminCount)
-        
+
         // Aplicar filtro
         await page.locator("//label[contains(.,'User Role')]/parent::div/following-sibling::div").click()
-        await page.getByRole('listbox').getByRole('option', {name: 'Admin'}).click()
-        await page.getByRole('button', {name: 'Search'}).click()
+        await page.getByRole('listbox').getByRole('option', { name: 'Admin' }).click()
+        await page.getByRole('button', { name: 'Search' }).click()
 
         //Esperar recarga de la tabla
         await expect(page.locator('.oxd-table-card').first()).toBeVisible()
@@ -145,4 +147,56 @@ test.describe('HRM users table', () => {
         await expect(expectedAdminCount).toEqual(adminCount)
 
     })
-});
+
+    test('Add new user', async ({ page }) => {
+        const randomUsername = 'CosmeFulanito' + crypto.randomUUID().slice(0, 5);
+        const password = Math.random().toString(36).slice(-8); // Generate a random password
+        const employeeToSearch = "Andrew  Hisham"
+
+        await page.goto('/web/index.php/dashboard/index')
+        const sidePanel = new SidePanel(page)
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
+        const topBarMenu = new UserManagmentMenu(page)
+        await topBarMenu.clickOnUsers()
+
+        await page.getByRole('button', { name: 'Add' })
+            .click()
+
+        //fill the form
+        //Select user role
+        await page.locator("//label[contains(.,'User Role')]/parent::div/following-sibling::div")
+            .click()
+        await page.getByRole('listbox').getByRole('option', { name: 'ESS' })
+            .click()
+        //Fill employee name
+        await page.getByRole('textbox', { name: 'Type for hints...' })
+            .fill(employeeToSearch)
+        await page.getByText(employeeToSearch, { exact: true }).nth(0)
+            .click()
+        //Select user status
+        await page.locator('div.oxd-grid-item--gutters')
+            .filter({ has: page.getByText('Status') })
+            .locator('div.oxd-select-text-input')
+            .click()
+        await page.getByText('Enabled', { exact: true }).click()
+        //Fill username
+        await page.locator('div.oxd-grid-item--gutters')
+            .filter({ has: page.getByText('Username') })
+            .getByRole('textbox')
+            .fill(randomUsername)
+        //Fill password
+        await page.locator('div.oxd-grid-item--gutters')
+            .filter({ has: page.getByText('Password', {exact : true}) })
+            .getByRole('textbox')
+            .fill(password)
+        //Fill confirm password
+        await page.locator('div.oxd-grid-item--gutters')
+            .filter({ has: page.getByText('Confirm Password', {exact : true}) })
+            .getByRole('textbox')
+            .fill(password)
+        //Click save
+        await page.getByRole('button', {name: "Save"}).click()
+        //Confirme creation message
+        await expect(page.locator('p.oxd-text--toast-message')).toHaveText('Successfully Saved')
+    })
+}); 
