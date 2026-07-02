@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pageobjects/loginPage';
 import { SidePanel, SideMenuOption } from "../components/SidePanel";
 import { UserManagmentMenu } from '../components/top-bar-menu/UserManagmentMenu';
+import { Navigate } from '../pageobjects/Navigate';
+import { AddNewUserPage, NewUser } from '../pageobjects/AddNewUserPage';
 
 
 test.describe('HRM users table', () => {
@@ -149,54 +150,31 @@ test.describe('HRM users table', () => {
     })
 
     test('Add new user', async ({ page }) => {
-        const randomUsername = 'CosmeFulanito' + crypto.randomUUID().slice(0, 5);
-        const password = Math.random().toString(36).slice(-8); // Generate a random password
-        const employeeToSearch = "Andrew  Hisham"
+    // Arrange
+    const user: NewUser = {
+        role: 'ESS',
+        employeeName: 'Qwerty Qwerty LName',
+        status: 'Enabled',
+        username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
+        password: Math.random().toString(36).slice(-8)
+    };
 
-        await page.goto('/web/index.php/dashboard/index')
-        const sidePanel = new SidePanel(page)
-        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
-        const topBarMenu = new UserManagmentMenu(page)
-        await topBarMenu.clickOnUsers()
+    const navigate = new Navigate(page);
+    const sidePanel = new SidePanel(page);
+    const userManagementMenu = new UserManagmentMenu(page);
+    const addNewUserPage = new AddNewUserPage(page);
 
-        await page.getByRole('button', { name: 'Add' })
-            .click()
+    // Act
+    await navigate.goToDashboard();
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
 
-        //fill the form
-        //Select user role
-        await page.locator("//label[contains(.,'User Role')]/parent::div/following-sibling::div")
-            .click()
-        await page.getByRole('listbox').getByRole('option', { name: 'ESS' })
-            .click()
-        //Fill employee name
-        await page.getByRole('textbox', { name: 'Type for hints...' })
-            .fill(employeeToSearch)
-        await page.getByText(employeeToSearch, { exact: true }).nth(0)
-            .click()
-        //Select user status
-        await page.locator('div.oxd-grid-item--gutters')
-            .filter({ has: page.getByText('Status') })
-            .locator('div.oxd-select-text-input')
-            .click()
-        await page.getByText('Enabled', { exact: true }).click()
-        //Fill username
-        await page.locator('div.oxd-grid-item--gutters')
-            .filter({ has: page.getByText('Username') })
-            .getByRole('textbox')
-            .fill(randomUsername)
-        //Fill password
-        await page.locator('div.oxd-grid-item--gutters')
-            .filter({ has: page.getByText('Password', {exact : true}) })
-            .getByRole('textbox')
-            .fill(password)
-        //Fill confirm password
-        await page.locator('div.oxd-grid-item--gutters')
-            .filter({ has: page.getByText('Confirm Password', {exact : true}) })
-            .getByRole('textbox')
-            .fill(password)
-        //Click save
-        await page.getByRole('button', {name: "Save"}).click()
-        //Confirme creation message
-        await expect(page.locator('p.oxd-text--toast-message')).toHaveText('Successfully Saved')
+    await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+    await userManagementMenu.clickOnUsers();
+
+    await addNewUserPage.clickAdd();
+    await addNewUserPage.createUser(user);
+
+    // Assert
+    await addNewUserPage.expectUserCreated();
     })
-}); 
+})
