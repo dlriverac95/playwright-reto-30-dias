@@ -10,7 +10,7 @@ export class Environment {
         const value = process.env[key]
 
         if(!value){
-            throw new Error('Environment variable ' + key + 'does not exist')
+            throw new Error('Environment variable ' + key + ' does not exist')
         }
         return value
     }
