@@ -1,12 +1,5 @@
 import { Page, expect, Locator } from "@playwright/test";
-
-export interface NewUser {
-    role: string;
-    employeeName: string;
-    status: string;
-    username: string;
-    password: string;
-}
+import { UserModel } from "../models/UserModel";
 
 export class AddNewUserPage {
     private readonly addButton: Locator;
@@ -21,11 +14,13 @@ export class AddNewUserPage {
     private readonly confirmPasswordInput: Locator;
 
     private readonly confirmationMessage: Locator;
+    private readonly confirmationPasswordErrorMessage: Locator;
 
     constructor(private readonly page: Page) {
         this.addButton = page.getByRole("button", { name: "Add" });
         this.saveButton = page.getByRole("button", { name: "Save" });
         this.confirmationMessage = page.locator("p.oxd-text--toast-message");
+        this.confirmationPasswordErrorMessage = page.locator("span.oxd-input-field-error-message");
 
         this.userRoleDropdown = page.locator(
             "//label[contains(.,'User Role')]/parent::div/following-sibling::div"
@@ -104,13 +99,19 @@ export class AddNewUserPage {
             .toHaveText('Successfully Saved')
     }
 
-    async createUser(user: NewUser) {
-        await this.selectUserRole(user.role);
-        await this.fillEmployeeName(user.employeeName);
-        await this.selectUserStatus(user.status);
-        await this.fillUsername(user.username);
-        await this.fillPassword(user.password);
-        await this.fillConfirmPassword(user.password);
-        await this.clickSave();
+    async expectUserCreationFailed() {
+        await expect(this.confirmationPasswordErrorMessage)
+            .toHaveText('Passwords do not match')
+    }
+
+    async createUser(user: UserModel) {
+        await this.clickAdd()
+        await this.selectUserRole(user.role)
+        await this.fillEmployeeName(user.employeeName)
+        await this.selectUserStatus(user.status)
+        await this.fillUsername(user.username)
+        await this.fillPassword(user.password)
+        await this.fillConfirmPassword(user.confirmPassword)
+        await this.clickSave()
     }
 }

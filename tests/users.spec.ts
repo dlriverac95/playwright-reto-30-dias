@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import { SidePanel, SideMenuOption } from "../components/SidePanel";
 import { UserManagmentMenu } from '../components/top-bar-menu/UserManagmentMenu';
 import { Navigate } from '../pageobjects/Navigate';
-import { AddNewUserPage, NewUser } from '../pageobjects/AddNewUserPage';
+import { AddNewUserPage } from '../pageobjects/AddNewUserPage';
+import { UserModel } from '../models/UserModel';
 
 
 test.describe('HRM users table', () => {
@@ -149,14 +150,16 @@ test.describe('HRM users table', () => {
 
     })
 
-    test('Add new user', async ({ page }) => {
+    test('Add new valid user', async ({ page }) => {
     // Arrange
-    const user: NewUser = {
+    const password = Math.random().toString(36).slice(-8);
+    const user: UserModel = {
         role: 'ESS',
         employeeName: 'Qwerty Qwerty LName',
         status: 'Enabled',
         username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
-        password: Math.random().toString(36).slice(-8)
+        password: password,
+        confirmPassword: password
     };
 
     const navigate = new Navigate(page);
@@ -171,10 +174,40 @@ test.describe('HRM users table', () => {
     await sidePanel.clickOnOption(SideMenuOption.ADMIN);
     await userManagementMenu.clickOnUsers();
 
-    await addNewUserPage.clickAdd();
     await addNewUserPage.createUser(user);
 
     // Assert
     await addNewUserPage.expectUserCreated();
+    })
+
+    test('Add new user with invalid password', async ({ page }) => {
+            // Arrange
+    const password = Math.random().toString(36).slice(-8);
+    const user: UserModel = {
+        role: 'ESS',
+        employeeName: 'Qwerty Qwerty LName',
+        status: 'Enabled',
+        username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
+        password: password,
+        confirmPassword: 'CosmeFulanito123' // Intentionally different to trigger validation
+    };
+
+    const navigate = new Navigate(page);
+    const sidePanel = new SidePanel(page);
+    const userManagementMenu = new UserManagmentMenu(page);
+    const addNewUserPage = new AddNewUserPage(page);
+
+    // Act
+    await navigate.goToDashboard();
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+
+    await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+    await userManagementMenu.clickOnUsers();
+
+    await addNewUserPage.createUser(user);
+
+    // Assert
+    await addNewUserPage.expectUserCreationFailed();
+
     })
 })
