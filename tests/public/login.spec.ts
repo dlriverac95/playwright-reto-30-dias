@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pageobjects/loginPage';
+import { LoginPage } from '../../pageobjects/LoginPage';
 import { SideMenuOption, SidePanel } from '../../components/SidePanel';
 
 test.describe('HRM Login Tests', () => {

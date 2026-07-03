@@ -167,7 +167,7 @@ test.describe('Users section', () => {
         const password = Math.random().toString(36).slice(-8);
         const user: UserModel = {
             role: 'ESS',
-            employeeName: 'Ava Mehta',
+            employeeName: 'Jane A. Doe',
             status: 'Enabled',
             username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
             password: password,
@@ -196,7 +196,7 @@ test.describe('Users section', () => {
         // Arrange
         const user: UserModel = {
             role: 'ESS',
-            employeeName: 'Ava Mehta',
+            employeeName: 'Jane A. Doe',
             status: 'Enabled',
             username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
             password: Math.random().toString(36).slice(-8),
