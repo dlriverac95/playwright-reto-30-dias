@@ -1,5 +1,10 @@
 # Playwright Reto 30 Días
 
+[![Playwright Tests](https://github.com/dlriverac95/playwright-reto-30-dias/actions/workflows/playwright.yml/badge.svg)](https://github.com/dlriverac95/playwright-reto-30-dias/actions)
+[![Playwright Version](https://img.shields.io/badge/playwright-v1.49+-green.svg?logo=playwright)](https://playwright.dev/)
+[![Language](https://img.shields.io/badge/language-TypeScript-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-yellow.svg)](LICENSE)
+
 Este proyecto contiene una suite de pruebas end-to-end automatizadas para la plataforma demo de OrangeHRM, desarrollada con Playwright y TypeScript. El objetivo es practicar y demostrar buenas prácticas de automatización, incluyendo Page Object Model, separación de flujos públicos y administrativos, y reutilización de sesión mediante almacenamiento de estado.
 
 ## ¿Qué incluye?
@@ -16,6 +21,7 @@ Este proyecto contiene una suite de pruebas end-to-end automatizadas para la pla
 - [TypeScript](https://www.typescriptlang.org/)
 - [Node.js](https://nodejs.org/)
 - [dotenv](https://github.com/motdotla/dotenv)
+- [Pipeline] GitHub Actions
 
 ## Estructura del proyecto
 
