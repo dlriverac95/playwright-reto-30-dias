@@ -1,17 +1,21 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pageobjects/loginPage';
-import { TopBarMenu } from '../components/top-bar-menu/TopBarMenu';
-import { SideMenuOption, SidePanel } from "../components/SidePanel";
+import { TopBarMenu } from '../../components/top-bar-menu/TopBarMenu';
+import { SideMenuOption, SidePanel } from "../../components/SidePanel";
+import { Navigate } from '../../pageobjects/Navigate';
 
 test.describe('HRM navigation bar', () => {
+    /*
     test.beforeEach(async ({ page }) => {
         const loginPage = new LoginPage(page)
         await loginPage.loginAsAdmin()
         const sidePanel = new SidePanel(page)
         await expect(sidePanel.listOptions(SideMenuOption.ADMIN)).toBeVisible()
     })
-
+    */
     test('Check left menu options', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
         const expectedMenuItems = ['Admin', 'PIM', 'Leave', 'Time', 'Recruitment', 'My Info', 'Performance', 'Dashboard', 'Directory', 'Maintenance', 'Claim', 'Buzz']
         const currentMenuItems: string[] = []
         const menuItems = page.getByLabel('Sidepanel').getByRole('listitem')
@@ -29,6 +33,8 @@ test.describe('HRM navigation bar', () => {
     })
 
     test('Navigate through left menu options', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         const menuItems = page.getByLabel('Sidepanel').getByRole('listitem')
         const currentMenuItemsCount = await menuItems.count()
 
@@ -71,6 +77,8 @@ test.describe('HRM navigation bar', () => {
             }
         ]
 
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         await page.getByRole('link', { name: 'Admin' }).click()
         await page.getByRole('navigation', { name: 'Topbar menu' }).getByText('Qualifications').click()
 
@@ -122,6 +130,8 @@ test.describe('HRM navigation bar', () => {
             }
         ]
 
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         await page.getByRole('link', { name: 'Admin' }).click()
         await page.getByRole('navigation', { name: 'Topbar menu' }).getByText('Configuration').click()
 
@@ -137,7 +147,9 @@ test.describe('HRM navigation bar', () => {
 
     })
 
-    test('Check top bar menu options', async ({ page }) => {        
+    test('Check top bar menu options', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         const sidePanel = new SidePanel(page)
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
 

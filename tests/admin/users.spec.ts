@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { SidePanel, SideMenuOption } from "../components/SidePanel";
-import { UserManagmentMenu } from '../components/top-bar-menu/UserManagmentMenu';
-import { Navigate } from '../pageobjects/Navigate';
-import { AddNewUserPage } from '../pageobjects/AddNewUserPage';
-import { UserModel } from '../models/UserModel';
+import { SidePanel, SideMenuOption } from "../../components/SidePanel";
+import { UserManagmentMenu } from '../../components/top-bar-menu/UserManagmentMenu';
+import { Navigate } from '../../pageobjects/Navigate';
+import { AddNewUserPage } from '../../pageobjects/AddNewUserPage';
+import { UserModel } from '../../models/UserModel';
 
 
-test.describe('HRM users table', () => {
+test.describe('Users section', () => {
     /*
     test.beforeEach(async ({ page }) => {
         const loginPage = new LoginPage(page)
@@ -16,6 +16,8 @@ test.describe('HRM users table', () => {
     });
     */
     test('Get all the usernames registered', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         await page.getByRole('link', { name: 'Admin' }).click()
         await page.getByRole('navigation', { name: 'Topbar Menu' }).getByText('User Management').click()
         await page.getByRole('menuitem', { name: 'Users' }).click()
@@ -37,6 +39,8 @@ test.describe('HRM users table', () => {
     });
 
     test('Get all the employee names registered', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         await page.getByRole('link', { name: 'Admin' }).click()
         await page.getByRole('navigation', { name: 'Topbar Menu' }).getByText('User Management').click()
         await page.getByRole('menuitem', { name: 'Users' }).click()
@@ -59,6 +63,8 @@ test.describe('HRM users table', () => {
 
 
     test('Select specific user for edition', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         await page.getByRole('link', { name: 'Admin' }).click()
         await page.getByRole('navigation', { name: 'Topbar Menu' }).getByText('User Management').click()
         await page.getByRole('menuitem', { name: 'Users' }).click()
@@ -87,6 +93,8 @@ test.describe('HRM users table', () => {
     });
 
     test('Check user role options', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         const expectedRoleOptions = ['-- Select --', 'Admin', 'ESS']
 
         const sidePanel = new SidePanel(page)
@@ -101,6 +109,8 @@ test.describe('HRM users table', () => {
     });
 
     test('Check status options', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         const expectedStatusOptions = ['-- Select --', 'Enabled', 'Disabled']
 
         const sidePanel = new SidePanel(page)
@@ -115,6 +125,8 @@ test.describe('HRM users table', () => {
     });
 
     test('Filter by user admin', async ({ page }) => {
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         const sidePanel = new SidePanel(page)
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
 
@@ -151,62 +163,62 @@ test.describe('HRM users table', () => {
     })
 
     test('Add new valid user', async ({ page }) => {
-    // Arrange
-    const password = Math.random().toString(36).slice(-8);
-    const user: UserModel = {
-        role: 'ESS',
-        employeeName: 'Qwerty Qwerty LName',
-        status: 'Enabled',
-        username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
-        password: password,
-        confirmPassword: password
-    };
+        // Arrange
+        const password = Math.random().toString(36).slice(-8);
+        const user: UserModel = {
+            role: 'ESS',
+            employeeName: 'Ava Mehta',
+            status: 'Enabled',
+            username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
+            password: password,
+            confirmPassword: password
+        };
 
-    const navigate = new Navigate(page);
-    const sidePanel = new SidePanel(page);
-    const userManagementMenu = new UserManagmentMenu(page);
-    const addNewUserPage = new AddNewUserPage(page);
+        const navigate = new Navigate(page);
+        const sidePanel = new SidePanel(page);
+        const userManagementMenu = new UserManagmentMenu(page);
+        const addNewUserPage = new AddNewUserPage(page);
 
-    // Act
-    await navigate.goToDashboard();
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+        // Act
+        await navigate.goToDashboard();
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
 
-    await sidePanel.clickOnOption(SideMenuOption.ADMIN);
-    await userManagementMenu.clickOnUsers();
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+        await userManagementMenu.clickOnUsers();
 
-    await addNewUserPage.createUser(user);
+        await addNewUserPage.createUser(user);
 
-    // Assert
-    await addNewUserPage.expectUserCreated();
+        // Assert
+        await addNewUserPage.expectUserCreated();
     })
 
     test('Add new user with invalid password', async ({ page }) => {
-    // Arrange
-    const user: UserModel = {
-        role: 'ESS',
-        employeeName: 'Qwerty Qwerty LName',
-        status: 'Enabled',
-        username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
-        password: Math.random().toString(36).slice(-8),
-        confirmPassword: 'CosmeFulanito123' // Intentionally different to trigger validation
-    };
+        // Arrange
+        const user: UserModel = {
+            role: 'ESS',
+            employeeName: 'Ava Mehta',
+            status: 'Enabled',
+            username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
+            password: Math.random().toString(36).slice(-8),
+            confirmPassword: 'CosmeFulanito123' // Intentionally different to trigger validation
+        };
 
-    const navigate = new Navigate(page);
-    const sidePanel = new SidePanel(page);
-    const userManagementMenu = new UserManagmentMenu(page);
-    const addNewUserPage = new AddNewUserPage(page);
+        const navigate = new Navigate(page);
+        const sidePanel = new SidePanel(page);
+        const userManagementMenu = new UserManagmentMenu(page);
+        const addNewUserPage = new AddNewUserPage(page);
 
-    // Act
-    await navigate.goToDashboard();
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+        // Act
+        await navigate.goToDashboard();
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
 
-    await sidePanel.clickOnOption(SideMenuOption.ADMIN);
-    await userManagementMenu.clickOnUsers();
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+        await userManagementMenu.clickOnUsers();
 
-    await addNewUserPage.createUser(user);
+        await addNewUserPage.createUser(user);
 
-    // Assert
-    await addNewUserPage.expectUserCreationFailed();
+        // Assert
+        await addNewUserPage.expectUserCreationFailed();
 
     })
 })

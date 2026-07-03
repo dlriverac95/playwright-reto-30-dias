@@ -43,14 +43,17 @@ export default defineConfig({
     {
       name: 'admin',
       dependencies: ['setup'],
+      testDir: './tests/admin',
       use: {
-         ...devices['Desktop Chrome'],
-        storageState: '.auth/admin.json'},
+        ...devices['Desktop Chrome'],
+        storageState: '.auth/admin.json'
+      },
     },
     /*
     {
       name: 'employee',
       dependencies: ['setup'],
+      testDir: './tests/employee',
       use: {
          ...devices['Desktop Chrome'],
         storageState: '.auth/employee.json',},
@@ -58,16 +61,19 @@ export default defineConfig({
     */
     {
       name: 'chromium',
+      testDir: './tests/public',
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
+      testDir: './tests/public',
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
+      testDir: './tests/public',
       use: { ...devices['Desktop Safari'] },
     },
 

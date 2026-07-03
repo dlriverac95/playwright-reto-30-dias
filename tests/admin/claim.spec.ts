@@ -1,11 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { SideMenuOption, SidePanel } from "../components/SidePanel";
+import { SideMenuOption, SidePanel } from "../../components/SidePanel";
+import { Navigate } from '../../pageobjects/Navigate';
 
 test.describe('Claim section', () => {
 
     test('capture all amounts', async ({ page }) => {
 
-        await page.goto('/web/index.php/dashboard/index')
+        const navigate = new Navigate(page);
+        await navigate.goToDashboard();
         const sidePanel = new SidePanel(page)
         await sidePanel.clickOnOption(SideMenuOption.CLAIM)
 

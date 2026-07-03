@@ -1,5 +1,5 @@
 import {test as setup, expect} from '@playwright/test';
-import { LoginPage } from '../pageobjects/LoginPage';
+import { LoginPage } from '../pageobjects/loginPage';
 
 setup('authentication as Admin', async ({ page }) => {
     const loginPage = new LoginPage(page)
