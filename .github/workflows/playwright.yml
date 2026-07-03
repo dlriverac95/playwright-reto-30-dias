@@ -22,6 +22,8 @@ jobs:
       env: 
         ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
         ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        ESS_USERNAME: 'empleado_temporal'
+        ESS_PASSWORD: 'password_temporal'
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
