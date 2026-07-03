@@ -21,7 +21,7 @@ Este proyecto contiene una suite de pruebas end-to-end automatizadas para la pla
 - [TypeScript](https://www.typescriptlang.org/)
 - [Node.js](https://nodejs.org/)
 - [dotenv](https://github.com/motdotla/dotenv)
-- [Pipeline] GitHub Actions
+- **Pipeline de CI/CD:** GitHub Actions
 
 ## Estructura del proyecto
 
