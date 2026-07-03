@@ -181,14 +181,13 @@ test.describe('HRM users table', () => {
     })
 
     test('Add new user with invalid password', async ({ page }) => {
-            // Arrange
-    const password = Math.random().toString(36).slice(-8);
+    // Arrange
     const user: UserModel = {
         role: 'ESS',
         employeeName: 'Qwerty Qwerty LName',
         status: 'Enabled',
         username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
-        password: password,
+        password: Math.random().toString(36).slice(-8),
         confirmPassword: 'CosmeFulanito123' // Intentionally different to trigger validation
     };
 
