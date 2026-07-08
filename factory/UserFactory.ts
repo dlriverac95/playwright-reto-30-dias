@@ -34,6 +34,7 @@ export class UserFactory {
     static createAdminUserWithInvalidPassword(override?: Partial<UserModel>): UserModel {
         return this.base({ role: 'Admin', password: '123', ...(override || {}) });
     }
+    
     static createESSUserWithDisabledStatus(override?: Partial<UserModel>): UserModel {
         return this.base({ role: 'ESS', status: 'Disabled', ...(override || {}) });
     }

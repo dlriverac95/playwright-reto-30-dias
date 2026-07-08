@@ -166,7 +166,7 @@ test.describe('Users section', () => {
     test('Add new valid Admin user', async ({ page }) => {
         // Arrange
         const AdminUser = UserFactory.createAdminUser({
-            employeeName: 'Qwerty Qwerty LName'
+            employeeName: 'John  Doe'
         });
 
         const navigate = new Navigate(page);
@@ -187,8 +187,8 @@ test.describe('Users section', () => {
 
     test('Add new Admin user with invalid password', async ({ page }) => {
         // Arrange
-        const AdminUser = UserFactory.createAdminUser({
-            employeeName: 'Qwerty Qwerty LName'
+        const AdminUser = UserFactory.createAdminUserWithInvalidPassword({
+            employeeName: 'John  Doe'
         });
 
         const navigate = new Navigate(page);
@@ -210,7 +210,7 @@ test.describe('Users section', () => {
     test('Add new valid ESS user', async ({ page }) => {
         // Arrange
         const ESSUser = UserFactory.createEmployeeUser({
-            employeeName: 'Qwerty Qwerty LName'
+            employeeName: 'John  Doe'
         });
 
         const navigate = new Navigate(page);
@@ -232,7 +232,7 @@ test.describe('Users section', () => {
     test('Add new disabled Admin user', async ({ page }) => {
         // Arrange
         const AdminUser = UserFactory.createAdminUserWithDisabledStatus({
-            employeeName: 'Qwerty Qwerty LName'
+            employeeName: 'John  Doe'
         });
 
         const navigate = new Navigate(page);
@@ -254,7 +254,7 @@ test.describe('Users section', () => {
         test('Add new disabled ESS user', async ({ page }) => {
         // Arrange
         const ESSUser = UserFactory.createESSUserWithDisabledStatus({
-            employeeName: 'Qwerty Qwerty LName'
+            employeeName: 'John  Doe'
         });
 
         const navigate = new Navigate(page);
