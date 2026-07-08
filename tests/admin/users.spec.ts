@@ -4,6 +4,7 @@ import { UserManagmentMenu } from '../../components/top-bar-menu/UserManagmentMe
 import { Navigate } from '../../pageobjects/Navigate';
 import { AddNewUserPage } from '../../pageobjects/AddNewUserPage';
 import { UserModel } from '../../models/UserModel';
+import { UserFactory } from '../../factory/UserFactory';
 
 
 test.describe('Users section', () => {
@@ -162,17 +163,11 @@ test.describe('Users section', () => {
 
     })
 
-    test('Add new valid user', async ({ page }) => {
+    test('Add new valid Admin user', async ({ page }) => {
         // Arrange
-        const password = Math.random().toString(36).slice(-8);
-        const user: UserModel = {
-            role: 'ESS',
-            employeeName: 'Qwerty Qwerty LName',
-            status: 'Enabled',
-            username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
-            password: password,
-            confirmPassword: password
-        };
+        const AdminUser = UserFactory.createAdminUser({
+            employeeName: 'Qwerty Qwerty LName'
+        });
 
         const navigate = new Navigate(page);
         const sidePanel = new SidePanel(page);
@@ -182,26 +177,19 @@ test.describe('Users section', () => {
         // Act
         await navigate.goToDashboard();
         await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-
         await sidePanel.clickOnOption(SideMenuOption.ADMIN);
         await userManagementMenu.clickOnUsers();
-
-        await addNewUserPage.createUser(user);
+        await addNewUserPage.createUser(AdminUser);
 
         // Assert
         await addNewUserPage.expectUserCreated();
     })
 
-    test('Add new user with invalid password', async ({ page }) => {
+    test('Add new Admin user with invalid password', async ({ page }) => {
         // Arrange
-        const user: UserModel = {
-            role: 'ESS',
-            employeeName: 'Qwerty Qwerty LName',
-            status: 'Enabled',
-            username: `CosmeFulanito${crypto.randomUUID().slice(0, 5)}`,
-            password: Math.random().toString(36).slice(-8),
-            confirmPassword: 'CosmeFulanito123' // Intentionally different to trigger validation
-        };
+        const AdminUser = UserFactory.createAdminUser({
+            employeeName: 'Qwerty Qwerty LName'
+        });
 
         const navigate = new Navigate(page);
         const sidePanel = new SidePanel(page);
@@ -211,14 +199,77 @@ test.describe('Users section', () => {
         // Act
         await navigate.goToDashboard();
         await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-
         await sidePanel.clickOnOption(SideMenuOption.ADMIN);
         await userManagementMenu.clickOnUsers();
-
-        await addNewUserPage.createUser(user);
+        await addNewUserPage.createUser(AdminUser);
 
         // Assert
         await addNewUserPage.expectUserCreationFailed();
+    })
 
+    test('Add new valid ESS user', async ({ page }) => {
+        // Arrange
+        const ESSUser = UserFactory.createEmployeeUser({
+            employeeName: 'Qwerty Qwerty LName'
+        });
+
+        const navigate = new Navigate(page);
+        const sidePanel = new SidePanel(page);
+        const userManagementMenu = new UserManagmentMenu(page);
+        const addNewUserPage = new AddNewUserPage(page);
+
+        // Act
+        await navigate.goToDashboard();
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+        await userManagementMenu.clickOnUsers();
+        await addNewUserPage.createUser(ESSUser);
+
+        // Assert
+        await addNewUserPage.expectUserCreated();
+    })
+
+    test('Add new disabled Admin user', async ({ page }) => {
+        // Arrange
+        const AdminUser = UserFactory.createAdminUserWithDisabledStatus({
+            employeeName: 'Qwerty Qwerty LName'
+        });
+
+        const navigate = new Navigate(page);
+        const sidePanel = new SidePanel(page);
+        const userManagementMenu = new UserManagmentMenu(page);
+        const addNewUserPage = new AddNewUserPage(page);
+
+        // Act
+        await navigate.goToDashboard();
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+        await userManagementMenu.clickOnUsers();
+        await addNewUserPage.createUser(AdminUser);
+
+        // Assert
+        await addNewUserPage.expectUserCreated();
+    })
+
+        test('Add new disabled ESS user', async ({ page }) => {
+        // Arrange
+        const ESSUser = UserFactory.createESSUserWithDisabledStatus({
+            employeeName: 'Qwerty Qwerty LName'
+        });
+
+        const navigate = new Navigate(page);
+        const sidePanel = new SidePanel(page);
+        const userManagementMenu = new UserManagmentMenu(page);
+        const addNewUserPage = new AddNewUserPage(page);
+
+        // Act
+        await navigate.goToDashboard();
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+        await userManagementMenu.clickOnUsers();
+        await addNewUserPage.createUser(ESSUser);
+
+        // Assert
+        await addNewUserPage.expectUserCreated();
     })
 })
