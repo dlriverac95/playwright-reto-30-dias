@@ -165,111 +165,167 @@ test.describe('Users section', () => {
 
     test('Add new valid Admin user', async ({ page }) => {
         // Arrange
-        const AdminUser = UserFactory.createAdminUser({
-            employeeName: 'John  Doe'
-        });
-
-        const navigate = new Navigate(page);
-        const sidePanel = new SidePanel(page);
-        const userManagementMenu = new UserManagmentMenu(page);
-        const addNewUserPage = new AddNewUserPage(page);
+        const navigate = new Navigate(page)
+        const sidePanel = new SidePanel(page)
+        const userManagementMenu = new UserManagmentMenu(page)
+        const addNewUserPage = new AddNewUserPage(page)
 
         // Act
-        await navigate.goToDashboard();
-        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+        await navigate.goToDashboard()
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
         await userManagementMenu.clickOnUsers();
-        await addNewUserPage.createUser(AdminUser);
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
+        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+        const currentAdminRows = allBodyRows.filter({
+            has: page.getByRole('cell').nth(2).getByText('Admin')
+        })
+        const firstAdminToSearch = currentAdminRows.nth(0)
+        await expect(firstAdminToSearch, "No admin users found in the table").toHaveCount(1)
+        await firstAdminToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
+        const employeeInput = page.getByPlaceholder('Type for hints...')
+        await expect(employeeInput).not.toHaveValue('')
+        const fullUserToSearch = await employeeInput.inputValue()
+        const AdminUser = UserFactory.createAdminUser({
+            employeeName: fullUserToSearch
+        })
+        await page.goBack()
+        await addNewUserPage.createUser(AdminUser)
 
         // Assert
-        await addNewUserPage.expectUserCreated();
+        await addNewUserPage.expectUserCreated()
+
     })
 
     test('Add new Admin user with invalid password', async ({ page }) => {
         // Arrange
-        const AdminUser = UserFactory.createAdminUserWithInvalidPassword({
-            employeeName: 'John  Doe'
-        });
-
-        const navigate = new Navigate(page);
-        const sidePanel = new SidePanel(page);
-        const userManagementMenu = new UserManagmentMenu(page);
-        const addNewUserPage = new AddNewUserPage(page);
+        const navigate = new Navigate(page)
+        const sidePanel = new SidePanel(page)
+        const userManagementMenu = new UserManagmentMenu(page)
+        const addNewUserPage = new AddNewUserPage(page)
 
         // Act
-        await navigate.goToDashboard();
-        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
-        await userManagementMenu.clickOnUsers();
-        await addNewUserPage.createUser(AdminUser);
+        await navigate.goToDashboard()
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
+        await userManagementMenu.clickOnUsers()
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
+        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+        const currentAdminRows = allBodyRows.filter({
+            has: page.getByRole('cell').nth(2).getByText('Admin')
+        })
+        const firstAdminToSearch = currentAdminRows.nth(0)
+        await expect(firstAdminToSearch, "No admin users found in the table").toHaveCount(1)
+        await firstAdminToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
+        const employeeInput = page.getByPlaceholder('Type for hints...')
+        await expect(employeeInput).not.toHaveValue('')
+        const fullUserToSearch = await employeeInput.inputValue()
+        const AdminUser = UserFactory.createAdminUserWithInvalidPassword({
+            employeeName: fullUserToSearch
+        });
+        await page.goBack()
+        await addNewUserPage.createUser(AdminUser)
 
         // Assert
-        await addNewUserPage.expectUserCreationFailed();
+        await addNewUserPage.expectUserCreationFailed()
     })
 
     test('Add new valid ESS user', async ({ page }) => {
         // Arrange
-        const ESSUser = UserFactory.createEmployeeUser({
-            employeeName: 'John  Doe'
-        });
-
-        const navigate = new Navigate(page);
-        const sidePanel = new SidePanel(page);
-        const userManagementMenu = new UserManagmentMenu(page);
-        const addNewUserPage = new AddNewUserPage(page);
+        const navigate = new Navigate(page)
+        const sidePanel = new SidePanel(page)
+        const userManagementMenu = new UserManagmentMenu(page)
+        const addNewUserPage = new AddNewUserPage(page)
 
         // Act
         await navigate.goToDashboard();
-        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
-        await userManagementMenu.clickOnUsers();
-        await addNewUserPage.createUser(ESSUser);
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
+        await userManagementMenu.clickOnUsers()
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
+        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+        const currentESSRows = allBodyRows.filter({
+            has: page.getByRole('cell').nth(2).getByText('ESS')
+        })
+        const firstESSToSearch = currentESSRows.nth(0)
+        await expect(firstESSToSearch, "No ESS users found in the table").toHaveCount(1)
+        await firstESSToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
+        const employeeInput = page.getByPlaceholder('Type for hints...')
+        await expect(employeeInput).not.toHaveValue('')
+        const fullUserToSearch = await employeeInput.inputValue()
+        const ESSUser = UserFactory.createEmployeeUser({
+            employeeName: fullUserToSearch
+        });
+        await page.goBack()
+        await addNewUserPage.createUser(ESSUser)
 
         // Assert
-        await addNewUserPage.expectUserCreated();
+        await addNewUserPage.expectUserCreated()
     })
 
     test('Add new disabled Admin user', async ({ page }) => {
         // Arrange
-        const AdminUser = UserFactory.createAdminUserWithDisabledStatus({
-            employeeName: 'John  Doe'
-        });
-
-        const navigate = new Navigate(page);
-        const sidePanel = new SidePanel(page);
-        const userManagementMenu = new UserManagmentMenu(page);
-        const addNewUserPage = new AddNewUserPage(page);
+        const navigate = new Navigate(page)
+        const sidePanel = new SidePanel(page)
+        const userManagementMenu = new UserManagmentMenu(page)
+        const addNewUserPage = new AddNewUserPage(page)
 
         // Act
         await navigate.goToDashboard();
-        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN)
         await userManagementMenu.clickOnUsers();
-        await addNewUserPage.createUser(AdminUser);
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
+        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+        const currentAdminRows = allBodyRows.filter({
+            has: page.getByRole('cell').nth(2).getByText('Admin')
+        })
+        const firstAdminToSearch = currentAdminRows.nth(0)
+        await expect(firstAdminToSearch, "No Admin users found in the table").toHaveCount(1)
+        await firstAdminToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
+        const employeeInput = page.getByPlaceholder('Type for hints...')
+        await expect(employeeInput).not.toHaveValue('')
+        const fullUserToSearch = await employeeInput.inputValue()
+        const AdminUser = UserFactory.createAdminUserWithDisabledStatus({
+            employeeName: fullUserToSearch
+        });
+        await page.goBack()
+        await addNewUserPage.createUser(AdminUser)
 
         // Assert
-        await addNewUserPage.expectUserCreated();
+        await addNewUserPage.expectUserCreated()
     })
 
-        test('Add new disabled ESS user', async ({ page }) => {
+    test('Add new disabled ESS user', async ({ page }) => {
         // Arrange
-        const ESSUser = UserFactory.createESSUserWithDisabledStatus({
-            employeeName: 'John  Doe'
-        });
-
-        const navigate = new Navigate(page);
-        const sidePanel = new SidePanel(page);
-        const userManagementMenu = new UserManagmentMenu(page);
-        const addNewUserPage = new AddNewUserPage(page);
+        const navigate = new Navigate(page)
+        const sidePanel = new SidePanel(page)
+        const userManagementMenu = new UserManagmentMenu(page)
+        const addNewUserPage = new AddNewUserPage(page)
 
         // Act
         await navigate.goToDashboard();
         await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
         await sidePanel.clickOnOption(SideMenuOption.ADMIN);
         await userManagementMenu.clickOnUsers();
-        await addNewUserPage.createUser(ESSUser);
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
+        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+        const currentESSRows = allBodyRows.filter({
+            has: page.getByRole('cell').nth(2).getByText('ESS')
+        })
+        const firstESSToSearch = currentESSRows.nth(0)
+        await expect(firstESSToSearch, "No ESS users found in the table").toHaveCount(1)
+        await firstESSToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
+        const employeeInput = page.getByPlaceholder('Type for hints...')
+        await expect(employeeInput).not.toHaveValue('');
+        const fullUserToSearch = await employeeInput.inputValue()
+        const ESSUser = UserFactory.createESSUserWithDisabledStatus({
+            employeeName: fullUserToSearch
+        });
+        await page.goBack()
+        await addNewUserPage.createUser(ESSUser)
 
         // Assert
-        await addNewUserPage.expectUserCreated();
+        await addNewUserPage.expectUserCreated()
     })
 })
