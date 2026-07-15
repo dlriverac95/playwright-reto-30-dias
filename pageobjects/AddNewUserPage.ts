@@ -114,4 +114,11 @@ export class AddNewUserPage {
         await this.fillConfirmPassword(user.confirmPassword)
         await this.clickSave()
     }
+
+    async getEmployeeName(): Promise<string>{
+        const employeeInput = this.page.getByPlaceholder('Type for hints...')
+        await expect(employeeInput).not.toHaveValue('')
+        const fullUserToSearch = await employeeInput.inputValue()
+        return fullUserToSearch
+    }
 }

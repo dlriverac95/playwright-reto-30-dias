@@ -3,8 +3,8 @@ import { SidePanel, SideMenuOption } from "../../components/SidePanel";
 import { UserManagmentMenu } from '../../components/top-bar-menu/UserManagmentMenu';
 import { Navigate } from '../../pageobjects/Navigate';
 import { AddNewUserPage } from '../../pageobjects/AddNewUserPage';
-import { UserModel } from '../../models/UserModel';
 import { UserFactory } from '../../factory/UserFactory';
+import { UsersTable } from '../../components/UsersTable';
 
 
 test.describe('Users section', () => {
@@ -19,78 +19,66 @@ test.describe('Users section', () => {
     test('Get all the usernames registered', async ({ page }) => {
         const navigate = new Navigate(page);
         await navigate.goToDashboard();
-        await page.getByRole('link', { name: 'Admin' }).click()
-        await page.getByRole('navigation', { name: 'Topbar Menu' }).getByText('User Management').click()
-        await page.getByRole('menuitem', { name: 'Users' }).click()
 
-        const rows = page.getByRole('table').getByRole('row')
-        await expect(rows.first()).toBeVisible()
-        const userNames: string[] = []
-        const rowCount = await rows.count()
+        const sidePanel = new SidePanel(page);
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
 
-        for (let i = 1; i < rowCount; i++) {
-            const cellUsername = rows.nth(i).getByRole('cell').nth(1)
-            const username = await cellUsername.textContent()
+        // Esperar carga de la tabla
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible();
 
-            if (username) {
-                userNames.push(username)
-            }
-        }
-        console.log(userNames)
+        const usersTable = new UsersTable(page);
+        const userNames = await usersTable.getAllUsernames();
+
+        console.log('Usernames: ', userNames);
     });
 
     test('Get all the employee names registered', async ({ page }) => {
         const navigate = new Navigate(page);
         await navigate.goToDashboard();
-        await page.getByRole('link', { name: 'Admin' }).click()
-        await page.getByRole('navigation', { name: 'Topbar Menu' }).getByText('User Management').click()
-        await page.getByRole('menuitem', { name: 'Users' }).click()
 
-        const rows = page.getByRole('table').getByRole('row')
-        await expect(rows.first()).toBeVisible()
-        const employeeNames: string[] = []
-        const rowCount = await rows.count()
+        const sidePanel = new SidePanel(page);
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
 
-        for (let i = 1; i < rowCount; i++) {
-            const cellEmployeeName = rows.nth(i).getByRole('cell').nth(3)
-            const employeeName = await cellEmployeeName.textContent()
+        // Esperar carga de la tabla
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible();
 
-            if (employeeName) {
-                employeeNames.push(employeeName)
-            }
-        }
-        console.log(employeeNames)
+        const usersTable = new UsersTable(page);
+        const employeeNames = await usersTable.getAllEmployeeNames();
+
+        console.log('Employee Names: ', employeeNames);
     });
 
 
     test('Select specific user for edition', async ({ page }) => {
         const navigate = new Navigate(page);
         await navigate.goToDashboard();
-        await page.getByRole('link', { name: 'Admin' }).click()
-        await page.getByRole('navigation', { name: 'Topbar Menu' }).getByText('User Management').click()
-        await page.getByRole('menuitem', { name: 'Users' }).click()
 
-        await expect(page.getByRole('table').getByRole('row').nth(1)).toBeVisible()
-        const validRows = page.getByRole('table').getByRole('row')
-        const usernames: string[] = [];
-        for (let i = 1; i < await validRows.count(); i++) {
-            var username = await validRows.nth(i).getByRole('cell').nth(1).innerText();
-            if (username !== 'Admin') {
-                usernames.push(username);
-            }
-        }
+        const sidePanel = new SidePanel(page);
+        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
 
+        const usersTable = new UsersTable(page);
+
+        // 1. Esperar a que la tabla cargue
+        await expect(page.locator('.oxd-table-card').first()).toBeVisible();
+
+        // 2. Obtener lista de usuarios (excluyendo 'Admin') delegando al POM
+        const usernames = await usersTable.getAvailableUsernames('Admin');
+
+
+        expect(usernames.length, 'No hay usuarios disponibles para editar aparte del Admin').toBeGreaterThan(0);
+
+        // 3. Seleccionar uno al azar
         const randomIndex = Math.floor(Math.random() * usernames.length);
         const selectedUsername = usernames[randomIndex];
-
-        const pencilButton = page.getByRole('table').getByRole('row').filter({ hasText: selectedUsername }).locator('button').filter({ has: page.locator('i.bi-pencil-fill') });
-        await pencilButton.click();
-
-
-        const usernameInput = page.locator("//label[contains(.,'Username')]/parent::div/following-sibling::div/input")
-        await expect(usernameInput).toHaveValue(selectedUsername);
         console.log(`Selected user for editing: ${selectedUsername}`);
-        console.log(`Username input value: ${await usernameInput.inputValue()}`);
+
+        // 4. Editar usando el POM
+        await usersTable.editUserByUsername(selectedUsername);
+
+        // 5. Validar que se abrió el formulario del usuario correcto
+        const usernameInput = page.locator("//label[contains(.,'Username')]/parent::div/following-sibling::div/input");
+
+        await expect(usernameInput).toHaveValue(selectedUsername);
     });
 
     test('Check user role options', async ({ page }) => {
@@ -128,39 +116,25 @@ test.describe('Users section', () => {
     test('Filter by user admin', async ({ page }) => {
         const navigate = new Navigate(page);
         await navigate.goToDashboard();
+
         const sidePanel = new SidePanel(page)
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
 
-        //Esperar carga de la tabla
+        const usersTable = new UsersTable(page)
+
+        // Esperar carga inicial
         await expect(page.locator('.oxd-table-card').first()).toBeVisible()
 
-        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
-
-        //Filas que contienen el role admin
-        const currentAdminRows = allBodyRows.filter({
-            has: page.getByRole('cell').nth(2).getByText('Admin')
-        })
-
+        const currentAdminRows = await usersTable.getAdminRows()
         const expectedAdminCount = await currentAdminRows.count()
-        console.log('Admin users before filtering: ', expectedAdminCount)
 
         // Aplicar filtro
         await page.locator("//label[contains(.,'User Role')]/parent::div/following-sibling::div").click()
         await page.getByRole('listbox').getByRole('option', { name: 'Admin' }).click()
         await page.getByRole('button', { name: 'Search' }).click()
 
-        //Esperar recarga de la tabla
-        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
-
-        //La tabla filtrada deberia tener exactamente la misma cantiadad que encontramos
-        const adminRowsAfterFiltering = allBodyRows.filter({
-            has: page.getByRole('cell').nth(2).getByText('Admin')
-        })
-        const adminCount = await adminRowsAfterFiltering.count()
-        console.log('Admin users after filtering: ', adminCount)
-
-        await expect(expectedAdminCount).toEqual(adminCount)
-
+        const adminRowsAfterFiltering = await usersTable.getAdminRows()
+        await expect(adminRowsAfterFiltering).toHaveCount(expectedAdminCount)
     })
 
     test('Add new valid Admin user', async ({ page }) => {
@@ -169,23 +143,15 @@ test.describe('Users section', () => {
         const sidePanel = new SidePanel(page)
         const userManagementMenu = new UserManagmentMenu(page)
         const addNewUserPage = new AddNewUserPage(page)
+        const usersTable = new UsersTable(page)
 
         // Act
         await navigate.goToDashboard()
         await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
         await userManagementMenu.clickOnUsers();
-        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
-        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
-        const currentAdminRows = allBodyRows.filter({
-            has: page.getByRole('cell').nth(2).getByText('Admin')
-        })
-        const firstAdminToSearch = currentAdminRows.nth(0)
-        await expect(firstAdminToSearch, "No admin users found in the table").toHaveCount(1)
-        await firstAdminToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
-        const employeeInput = page.getByPlaceholder('Type for hints...')
-        await expect(employeeInput).not.toHaveValue('')
-        const fullUserToSearch = await employeeInput.inputValue()
+        await usersTable.editFirstAdminOnTheTable()
+        const fullUserToSearch = await addNewUserPage.getEmployeeName()
         const AdminUser = UserFactory.createAdminUser({
             employeeName: fullUserToSearch
         })
@@ -203,23 +169,15 @@ test.describe('Users section', () => {
         const sidePanel = new SidePanel(page)
         const userManagementMenu = new UserManagmentMenu(page)
         const addNewUserPage = new AddNewUserPage(page)
+        const usersTable = new UsersTable(page)
 
         // Act
         await navigate.goToDashboard()
         await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
         await userManagementMenu.clickOnUsers()
-        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
-        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
-        const currentAdminRows = allBodyRows.filter({
-            has: page.getByRole('cell').nth(2).getByText('Admin')
-        })
-        const firstAdminToSearch = currentAdminRows.nth(0)
-        await expect(firstAdminToSearch, "No admin users found in the table").toHaveCount(1)
-        await firstAdminToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
-        const employeeInput = page.getByPlaceholder('Type for hints...')
-        await expect(employeeInput).not.toHaveValue('')
-        const fullUserToSearch = await employeeInput.inputValue()
+        await usersTable.editFirstAdminOnTheTable()
+        const fullUserToSearch = await addNewUserPage.getEmployeeName()
         const AdminUser = UserFactory.createAdminUserWithInvalidPassword({
             employeeName: fullUserToSearch
         });
@@ -236,23 +194,15 @@ test.describe('Users section', () => {
         const sidePanel = new SidePanel(page)
         const userManagementMenu = new UserManagmentMenu(page)
         const addNewUserPage = new AddNewUserPage(page)
+        const usersTable = new UsersTable(page)
 
         // Act
         await navigate.goToDashboard();
         await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
         await userManagementMenu.clickOnUsers()
-        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
-        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
-        const currentESSRows = allBodyRows.filter({
-            has: page.getByRole('cell').nth(2).getByText('ESS')
-        })
-        const firstESSToSearch = currentESSRows.nth(0)
-        await expect(firstESSToSearch, "No ESS users found in the table").toHaveCount(1)
-        await firstESSToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
-        const employeeInput = page.getByPlaceholder('Type for hints...')
-        await expect(employeeInput).not.toHaveValue('')
-        const fullUserToSearch = await employeeInput.inputValue()
+        await usersTable.editFirstESSOnTheTable()
+        const fullUserToSearch = await addNewUserPage.getEmployeeName()
         const ESSUser = UserFactory.createEmployeeUser({
             employeeName: fullUserToSearch
         });
@@ -269,23 +219,15 @@ test.describe('Users section', () => {
         const sidePanel = new SidePanel(page)
         const userManagementMenu = new UserManagmentMenu(page)
         const addNewUserPage = new AddNewUserPage(page)
+        const usersTable = new UsersTable(page)
 
         // Act
         await navigate.goToDashboard();
         await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
         await sidePanel.clickOnOption(SideMenuOption.ADMIN)
         await userManagementMenu.clickOnUsers();
-        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
-        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
-        const currentAdminRows = allBodyRows.filter({
-            has: page.getByRole('cell').nth(2).getByText('Admin')
-        })
-        const firstAdminToSearch = currentAdminRows.nth(0)
-        await expect(firstAdminToSearch, "No Admin users found in the table").toHaveCount(1)
-        await firstAdminToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
-        const employeeInput = page.getByPlaceholder('Type for hints...')
-        await expect(employeeInput).not.toHaveValue('')
-        const fullUserToSearch = await employeeInput.inputValue()
+        await usersTable.editFirstAdminOnTheTable()
+        const fullUserToSearch = await addNewUserPage.getEmployeeName()
         const AdminUser = UserFactory.createAdminUserWithDisabledStatus({
             employeeName: fullUserToSearch
         });
@@ -302,23 +244,15 @@ test.describe('Users section', () => {
         const sidePanel = new SidePanel(page)
         const userManagementMenu = new UserManagmentMenu(page)
         const addNewUserPage = new AddNewUserPage(page)
+        const usersTable = new UsersTable(page)
 
         // Act
         await navigate.goToDashboard();
         await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
         await sidePanel.clickOnOption(SideMenuOption.ADMIN);
         await userManagementMenu.clickOnUsers();
-        await expect(page.locator('.oxd-table-card').first()).toBeVisible()
-        const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
-        const currentESSRows = allBodyRows.filter({
-            has: page.getByRole('cell').nth(2).getByText('ESS')
-        })
-        const firstESSToSearch = currentESSRows.nth(0)
-        await expect(firstESSToSearch, "No ESS users found in the table").toHaveCount(1)
-        await firstESSToSearch.locator('button').filter({ has: page.locator('i.bi-pencil-fill') }).click()
-        const employeeInput = page.getByPlaceholder('Type for hints...')
-        await expect(employeeInput).not.toHaveValue('');
-        const fullUserToSearch = await employeeInput.inputValue()
+        await usersTable.editFirstESSOnTheTable()
+        const fullUserToSearch = await addNewUserPage.getEmployeeName()
         const ESSUser = UserFactory.createESSUserWithDisabledStatus({
             employeeName: fullUserToSearch
         });
