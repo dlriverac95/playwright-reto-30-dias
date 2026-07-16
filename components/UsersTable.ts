@@ -99,4 +99,26 @@ export class UsersTable {
         return this.getColumnTexts(3) // Índice 3 es Employee Name
     }
 
+    async clickOnDeleteActionByUsername(username: string) {
+        const allBodyRows = this.getAllBodyRows()
+        const filteredRowsByUsername = allBodyRows.filter({
+            has: this.page.getByRole('cell', { name: username, exact: true })
+        })
+
+        expect(filteredRowsByUsername, `No user found with username: ${username}`).toHaveCount(1)
+
+        await filteredRowsByUsername
+            .locator("button")
+            .filter({ has: this.page.locator('i.bi-trash') })
+            .click()
+    }
+
+    async acceptDeleteUser() {
+        await this.page.getByRole('button', { name: /Yes, Delete/ }).click()
+    }
+
+    async NotAcceptDeleteUser() {
+        await this.page.getByRole('button', { name: /No, Cancel/ }).click()
+    }
+
 }

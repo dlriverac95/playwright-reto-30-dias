@@ -99,6 +99,11 @@ export class AddNewUserPage {
             .toHaveText('Successfully Saved')
     }
 
+    async expectUserDeleted() {
+        await expect(this.confirmationMessage)
+            .toHaveText('Successfully Deleted', { timeout: 30_000 })
+    }
+
     async expectUserCreationFailed() {
         await expect(this.confirmationPasswordErrorMessage)
             .toHaveText('Passwords do not match')

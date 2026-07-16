@@ -241,16 +241,12 @@ test.describe('Users section', () => {
     test('Add new disabled ESS user', async ({ page }) => {
         // Arrange
         const navigate = new Navigate(page)
-        const sidePanel = new SidePanel(page)
-        const userManagementMenu = new UserManagmentMenu(page)
         const addNewUserPage = new AddNewUserPage(page)
         const usersTable = new UsersTable(page)
 
         // Act
-        await navigate.goToDashboard();
-        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-        await sidePanel.clickOnOption(SideMenuOption.ADMIN);
-        await userManagementMenu.clickOnUsers();
+        await navigate.toUser()
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
         await usersTable.editFirstESSOnTheTable()
         const fullUserToSearch = await addNewUserPage.getEmployeeName()
         const ESSUser = UserFactory.createESSUserWithDisabledStatus({
@@ -262,4 +258,58 @@ test.describe('Users section', () => {
         // Assert
         await addNewUserPage.expectUserCreated()
     })
+
+    test('Delete user admin', async ({ page }) => {
+        // Arrange
+        const navigate = new Navigate(page)
+        const addNewUserPage = new AddNewUserPage(page)
+        const usersTable = new UsersTable(page)
+
+        await navigate.toUser()
+        await usersTable.editFirstAdminOnTheTable()
+        const fullUserToSearch = await addNewUserPage.getEmployeeName()
+        const AdminUser = UserFactory.createAdminUser({
+            employeeName: fullUserToSearch
+        });
+        await page.goBack()
+        await addNewUserPage.createUser(AdminUser)
+        await addNewUserPage.expectUserCreated()
+
+        // Act
+        await usersTable.clickOnDeleteActionByUsername(AdminUser.username)
+        await usersTable.acceptDeleteUser()
+
+        //Assert
+        await addNewUserPage.expectUserDeleted()
+        await expect
+            .poll(async () => await usersTable.getAllUsernames())
+            .not.toContain(AdminUser.username);
+    })
+
+    test('Should not delete user when deletion is cancelled', async ({ page }) => {
+        // Arrange
+        const navigate = new Navigate(page)
+        const addNewUserPage = new AddNewUserPage(page)
+        const usersTable = new UsersTable(page)
+
+        await navigate.toUser()
+        await usersTable.editFirstAdminOnTheTable()
+        const fullUserToSearch = await addNewUserPage.getEmployeeName()
+        const AdminUser = UserFactory.createAdminUser({
+            employeeName: fullUserToSearch
+        });
+        await page.goBack()
+        await addNewUserPage.createUser(AdminUser)
+        await addNewUserPage.expectUserCreated()
+
+        // Act
+        await usersTable.clickOnDeleteActionByUsername(AdminUser.username)
+        await usersTable.NotAcceptDeleteUser()
+
+        //Assert
+        await expect
+            .poll(async () => await usersTable.getAllUsernames())
+            .toContain(AdminUser.username);
+    })
+
 })
