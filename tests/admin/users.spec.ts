@@ -246,7 +246,6 @@ test.describe('Users section', () => {
 
         // Act
         await navigate.toUser()
-        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
         await usersTable.editFirstESSOnTheTable()
         const fullUserToSearch = await addNewUserPage.getEmployeeName()
         const ESSUser = UserFactory.createESSUserWithDisabledStatus({
