@@ -137,7 +137,7 @@ test.describe('Users section', () => {
         await expect(adminRowsAfterFiltering).toHaveCount(expectedAdminCount)
     })
 
-    test('Add new valid Admin user', async ({ page }) => {
+    test('Add new valid Admin user @admin ', async ({ page }) => {
         // Arrange
         const navigate = new Navigate(page)
         const sidePanel = new SidePanel(page)
@@ -163,7 +163,7 @@ test.describe('Users section', () => {
 
     })
 
-    test('Add new Admin user with invalid password', async ({ page }) => {
+    test('Add new Admin user with invalid password @admin', async ({ page }) => {
         // Arrange
         const navigate = new Navigate(page)
         const sidePanel = new SidePanel(page)
@@ -188,7 +188,7 @@ test.describe('Users section', () => {
         await addNewUserPage.expectUserCreationFailed()
     })
 
-    test('Add new valid ESS user', async ({ page }) => {
+    test('Add new valid ESS user @ess', async ({ page }) => {
         // Arrange
         const navigate = new Navigate(page)
         const sidePanel = new SidePanel(page)
@@ -213,7 +213,7 @@ test.describe('Users section', () => {
         await addNewUserPage.expectUserCreated()
     })
 
-    test('Add new disabled Admin user', async ({ page }) => {
+    test('Add new disabled Admin user @admin', async ({ page }) => {
         // Arrange
         const navigate = new Navigate(page)
         const sidePanel = new SidePanel(page)
@@ -238,7 +238,7 @@ test.describe('Users section', () => {
         await addNewUserPage.expectUserCreated()
     })
 
-    test('Add new disabled ESS user', async ({ page }) => {
+    test('Add new disabled ESS user @ess', async ({ page }) => {
         // Arrange
         const navigate = new Navigate(page)
         const addNewUserPage = new AddNewUserPage(page)
@@ -258,7 +258,7 @@ test.describe('Users section', () => {
         await addNewUserPage.expectUserCreated()
     })
 
-    test('Delete user admin', async ({ page }) => {
+    test('Delete user admin @admin', async ({ page }) => {
         // Arrange
         const navigate = new Navigate(page)
         const addNewUserPage = new AddNewUserPage(page)
