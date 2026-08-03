@@ -50,7 +50,7 @@ export default defineConfig({
         storageState: '.auth/admin.json'
       },
     },
-    /*
+    
     {
       name: 'employee',
       dependencies: ['setup'],
@@ -59,7 +59,7 @@ export default defineConfig({
          ...devices['Desktop Chrome'],
         storageState: '.auth/employee.json',},
     },
-    */
+    
     {
       name: 'chromium',
       testDir: './tests/public',
