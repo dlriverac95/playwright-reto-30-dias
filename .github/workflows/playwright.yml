@@ -44,19 +44,19 @@ jobs:
         RUN_EMPLOYEE="${{ github.event.inputs.includeEmployee || 'false' }}"
         GREP="${{ github.event.inputs.grep || '' }}"
 
-        # Always run admin project
+        # Determine admin run: use user-provided GREP if present, otherwise run tests tagged @admin
         if [ -n "$GREP" ]; then
           npx playwright test --grep "$GREP" --project=admin
         else
-          npx playwright test --project=admin
+          npx playwright test --grep "@admin" --project=admin
         fi
 
-        # Optionally run employee project
+        # If requested, run tests tagged @ess (ignores project selection and runs on admin project)
         if [ "$RUN_EMPLOYEE" = "true" ]; then
           if [ -n "$GREP" ]; then
-            npx playwright test --grep "$GREP" --project=employee
+            npx playwright test --grep "$GREP" --project=admin
           else
-            npx playwright test --project=employee
+            npx playwright test --grep "@ess" --project=admin
           fi
         fi
       env: 
