@@ -7,12 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       grep:
-        description: "Campo opcional para filtrar los tests de playwright"
+        description: "Optional grep pattern to filter Playwright tests"
         required: false
         default: ''
         type: string
       project:
-        description: "Proyecto de Playwright contra el que ejecutar las pruebas"
+        description: "Playwright project to run tests against"
         required: true
         default: 'admin'
         type: choice
@@ -20,7 +20,7 @@ on:
           - admin
           - employee
       includeEmployee:
-        description: "Incluir ejecución de los tests del proyecto 'employee' además de 'admin'"
+        description: "Include execution of 'employee' project tests in addition to 'admin'"
         required: false
         default: false
         type: boolean
@@ -51,25 +51,25 @@ jobs:
       
     - name: Run Playwright tests
       run: |
-        echo "Iniciando tests. Variables: PROJECT=$PROJECT | GREP=$GREP_FILTER | INCLUDE_EMPLOYEE=$INCLUDE_EMPLOYEE"
+        echo "Starting tests. Variables: PROJECT=$PROJECT | GREP=$GREP_FILTER | INCLUDE_EMPLOYEE=$INCLUDE_EMPLOYEE"
         
-        echo "--- Paso 1: Ejecución del proyecto principal ---"
+        echo "--- Step 1: Main project execution ---"
         if [ -n "$GREP_FILTER" ]; then
-          echo "Comando: npx playwright test --grep \"$GREP_FILTER\" --project=\"$PROJECT\""
+          echo "Command: npx playwright test --grep \"$GREP_FILTER\" --project=\"$PROJECT\""
           npx playwright test --grep "$GREP_FILTER" --project="$PROJECT"
         else
-          echo "Comando: npx playwright test --grep \"@$PROJECT\" --project=\"$PROJECT\""
+          echo "Command: npx playwright test --grep \"@$PROJECT\" --project=\"$PROJECT\""
           npx playwright test --grep "@$PROJECT" --project="$PROJECT"
         fi
 
         if [ "$INCLUDE_EMPLOYEE" = "true" ]; then
-          echo "--- Paso 2: Ejecución secundaria (employee) ---"
+          echo "--- Step 2: Secondary execution (employee) ---"
           if [ -n "$GREP_FILTER" ]; then
-            echo "Comando: npx playwright test --grep \"$GREP_FILTER\" --project=employee"
+            echo "Command: npx playwright test --grep \"$GREP_FILTER\" --project=employee"
             npx playwright test --grep "$GREP_FILTER" --project=employee
           else
-            echo "Comando: npx playwright test --grep \"@ess\" --project=admin"
-            npx playwright test --grep "@ess" --project=admin
+            echo "Command: npx playwright test --grep \"@ess\" --project=employee"
+            npx playwright test --grep "@ess" --project=employee
           fi
         fi
 
