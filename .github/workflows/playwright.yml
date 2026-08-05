@@ -36,16 +36,19 @@ jobs:
     - name: Run Playwright tests
       run: |
         PROJECT="${{ github.event.inputs.project }}"
-        if [ -n "${{ github.event.inputs.grep }}" ]; then
-          npx playwright test --grep "${{ github.event.inputs.grep }}" --project="${PROJECT}"
+        GREP="${{ github.event.inputs.grep }}"
+        if [ -n "$GREP" ]; then
+          npx playwright test --grep "$GREP" --project="$PROJECT"
         else
-          npx playwright test --project="${PROJECT}"
+          npx playwright test --project="$PROJECT"
         fi
       env: 
         ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
         ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         ESS_USERNAME: 'empleado_temporal'
         ESS_PASSWORD: 'password_temporal'
+        PROJECT: ${{ github.event.inputs.project || 'admin' }}
+        GREP: ${{ github.event.inputs.grep || '' }}
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
