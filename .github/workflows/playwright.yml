@@ -3,8 +3,7 @@ on:
   push: 
     branches: [main, master]
   pull_request:
-      branches: [main, master]
-
+    branches: [main, master]
   workflow_dispatch:
     inputs:
       grep:
@@ -25,10 +24,21 @@ on:
         required: false
         default: false
         type: boolean
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      ESS_USERNAME: 'empleado_temporal'
+      ESS_PASSWORD: 'password_temporal'
+      
+      PROJECT: ${{ inputs.project || 'admin' }}
+      GREP_FILTER: ${{ inputs.grep || '' }}
+      INCLUDE_EMPLOYEE: ${{ inputs.includeEmployee || 'false' }}
+
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -38,38 +48,35 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+      
     - name: Run Playwright tests
       run: |
-        PROJECT="${{ github.event.inputs.project || 'admin' }}"
-        RUN_EMPLOYEE="${{ github.event.inputs.includeEmployee || 'false' }}"
-        GREP="${{ github.event.inputs.grep || '' }}"
-
-        # Determine admin run: use user-provided GREP if present, otherwise run tests tagged @admin
-        if [ -n "$GREP" ]; then
-          npx playwright test --grep "$GREP" --project=admin
+        echo "Iniciando tests. Variables: PROJECT=$PROJECT | GREP=$GREP_FILTER | INCLUDE_EMPLOYEE=$INCLUDE_EMPLOYEE"
+        
+        echo "--- Paso 1: Ejecución del proyecto principal ---"
+        if [ -n "$GREP_FILTER" ]; then
+          echo "Comando: npx playwright test --grep \"$GREP_FILTER\" --project=\"$PROJECT\""
+          npx playwright test --grep "$GREP_FILTER" --project="$PROJECT"
         else
-          npx playwright test --grep "@admin" --project=admin
+          echo "Comando: npx playwright test --grep \"@$PROJECT\" --project=\"$PROJECT\""
+          npx playwright test --grep "@$PROJECT" --project="$PROJECT"
         fi
 
-        # If requested, run tests tagged @ess (ignores project selection and runs on admin project)
-        if [ "$RUN_EMPLOYEE" = "true" ]; then
-          if [ -n "$GREP" ]; then
-            npx playwright test --grep "$GREP" --project=admin
+        if [ "$INCLUDE_EMPLOYEE" = "true" ]; then
+          echo "--- Paso 2: Ejecución secundaria (employee) ---"
+          if [ -n "$GREP_FILTER" ]; then
+            echo "Comando: npx playwright test --grep \"$GREP_FILTER\" --project=employee"
+            npx playwright test --grep "$GREP_FILTER" --project=employee
           else
+            echo "Comando: npx playwright test --grep \"@ess\" --project=admin"
             npx playwright test --grep "@ess" --project=admin
           fi
         fi
-      env: 
-        ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
-        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-        ESS_USERNAME: 'empleado_temporal'
-        ESS_PASSWORD: 'password_temporal'
-        PROJECT: ${{ github.event.inputs.project || 'admin' }}
-        GREP: ${{ github.event.inputs.grep || '' }}
-        INCLUDE_EMPLOYEE: ${{ github.event.inputs.includeEmployee || 'false' }}
+
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+        
