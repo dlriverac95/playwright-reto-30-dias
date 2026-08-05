@@ -19,7 +19,7 @@ on:
         type: choice
         options: 
           - admin
-          - ess
+          - employee
 jobs:
   test:
     timeout-minutes: 60
@@ -35,8 +35,6 @@ jobs:
       run: npx playwright install --with-deps
     - name: Run Playwright tests
       run: |
-        PROJECT="${{ github.event.inputs.project }}"
-        GREP="${{ github.event.inputs.grep }}"
         if [ -n "$GREP" ]; then
           npx playwright test --grep "$GREP" --project="$PROJECT"
         else
