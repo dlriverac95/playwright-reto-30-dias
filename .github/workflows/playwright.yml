@@ -1,5 +1,10 @@
 name: Playwright Tests
 on:
+  push: 
+    branches: [main, master]
+  pull_request:
+      branches: [main, master]
+
   workflow_dispatch:
     inputs:
       grep:
@@ -11,7 +16,10 @@ on:
         description: "Proyecto de Playwright contra el que ejecutar las pruebas"
         required: true
         default: 'admin'
-        type: string
+        type: choice
+        options: 
+          - admin
+          - ess
 jobs:
   test:
     timeout-minutes: 60
@@ -29,9 +37,9 @@ jobs:
       run: |
         PROJECT="${{ github.event.inputs.project }}"
         if [ -n "${{ github.event.inputs.grep }}" ]; then
-          npx playwright test --grep "${{ github.event.inputs.grep }}" --project="$PROJECT"
+          npx playwright test --grep "${{ github.event.inputs.grep }}" --project="${PROJECT}"
         else
-          npx playwright test --project="$PROJECT"
+          npx playwright test --project="${PROJECT}"
         fi
       env: 
         ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
