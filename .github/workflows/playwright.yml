@@ -20,6 +20,11 @@ on:
         options: 
           - admin
           - employee
+      includeEmployee:
+        description: "Incluir ejecución de los tests del proyecto 'employee' además de 'admin'"
+        required: false
+        default: false
+        type: boolean
 jobs:
   test:
     timeout-minutes: 60
@@ -35,10 +40,24 @@ jobs:
       run: npx playwright install --with-deps
     - name: Run Playwright tests
       run: |
+        PROJECT="${{ github.event.inputs.project || 'admin' }}"
+        RUN_EMPLOYEE="${{ github.event.inputs.includeEmployee || 'false' }}"
+        GREP="${{ github.event.inputs.grep || '' }}"
+
+        # Always run admin project
         if [ -n "$GREP" ]; then
-          npx playwright test --grep "$GREP" --project="$PROJECT"
+          npx playwright test --grep "$GREP" --project=admin
         else
-          npx playwright test --project="$PROJECT"
+          npx playwright test --project=admin
+        fi
+
+        # Optionally run employee project
+        if [ "$RUN_EMPLOYEE" = "true" ]; then
+          if [ -n "$GREP" ]; then
+            npx playwright test --grep "$GREP" --project=employee
+          else
+            npx playwright test --project=employee
+          fi
         fi
       env: 
         ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
@@ -47,6 +66,7 @@ jobs:
         ESS_PASSWORD: 'password_temporal'
         PROJECT: ${{ github.event.inputs.project || 'admin' }}
         GREP: ${{ github.event.inputs.grep || '' }}
+        INCLUDE_EMPLOYEE: ${{ github.event.inputs.includeEmployee || 'false' }}
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
