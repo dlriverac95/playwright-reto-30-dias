@@ -1,10 +1,12 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, request } from '@playwright/test';
 import { SidePanel, SideMenuOption } from "../../components/SidePanel";
 import { UserManagmentMenu } from '../../components/top-bar-menu/UserManagmentMenu';
 import { Navigate } from '../../pageobjects/Navigate';
 import { AddNewUserPage } from '../../pageobjects/AddNewUserPage';
 import { UserFactory } from '../../factory/UserFactory';
 import { UsersTable } from '../../components/UsersTable';
+import { readFile } from "fs/promises";
+import path from "path";
 
 
 test.describe('Users section', () => {
@@ -16,6 +18,59 @@ test.describe('Users section', () => {
         await expect(sidePanel.listOptions(SideMenuOption.ADMIN)).toBeVisible()
     });
     */
+
+    test('API Get All the users', async ({ page, request }) => {
+
+        const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
+
+        const authState = JSON.parse(await readFile(authFilePath, 'utf-8')) as {
+            cookies?: Array<{ name: string, value: string }>
+        }
+
+        const orangeHrmCookie = authState.cookies?.find(cookie => cookie.name == 'orangehrm')
+        expect(orangeHrmCookie, 'The orangehrm cookie was not found in the saved auth state').toBeTruthy()
+
+        const cookieHeader = `orangehrm=${orangeHrmCookie?.value}`
+
+        const response = await request.get(
+            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users?limit=50&offset=0&sortField=u.userName&sortOrder=ASC',
+            {
+                headers: {
+                    Cookie: cookieHeader,
+                    Accept: 'application/json'
+                }
+            }
+        )
+
+        expect(response.ok()).toBeTruthy()
+
+        const bodyJson = await response.json()
+        console.log(JSON.stringify(await bodyJson))
+    });
+
+    test('API - Get all users with invalid cookie should return Unauthorized', async ({ request }) => {
+
+        // Arrange
+        const invalidCookie = 'orangehrm=invalid-session-token-123456789';
+
+        // Act
+        const response = await request.get(
+            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users?limit=50&offset=0&sortField=u.userName&sortOrder=ASC',
+            {
+                headers: {
+                    Cookie: invalidCookie,
+                    Accept: 'application/json'
+                }
+            }
+        );
+
+        // Assert
+        expect(response.status()).toBe(401);
+
+        const body = await response.text();
+        console.log(body);
+    });
+
     test('Get all the usernames registered', async ({ page }) => {
         const navigate = new Navigate(page);
         await navigate.goToDashboard();
