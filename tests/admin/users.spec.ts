@@ -48,6 +48,70 @@ test.describe('Users section', () => {
         console.log(JSON.stringify(await bodyJson))
     });
 
+    test('API Add New User', async ({ page, request }) => {
+
+        const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
+
+        const authState = JSON.parse(await readFile(authFilePath, 'utf-8')) as {
+            cookies?: Array<{ name: string, value: string }>
+        }
+
+        const orangeHrmCookie = authState.cookies?.find(cookie => cookie.name == 'orangehrm')
+        expect(orangeHrmCookie, 'The orangehrm cookie was not found in the saved auth state').toBeTruthy()
+
+        const cookieHeader = `orangehrm=${orangeHrmCookie?.value}`
+        const username = 'user' + crypto.randomUUID().slice(0, 8)
+        const password = 'Password*123'
+
+        const response = await request.post(
+            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users',
+            {
+                headers: {
+                    Cookie: cookieHeader,
+                    Accept: 'application/json'
+                },
+                data: {"username":username,"password":password,"status":true,"userRoleId":1,"empNumber":3}
+            }
+        )
+
+        expect(response.ok()).toBeTruthy()
+
+        const bodyJson = await response.json()
+        console.log(JSON.stringify(await bodyJson))
+    });
+
+    test('API Add New User with existing username should fail', async ({ page, request }) => {
+
+        const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
+
+        const authState = JSON.parse(await readFile(authFilePath, 'utf-8')) as {
+            cookies?: Array<{ name: string, value: string }>
+        }
+
+        const orangeHrmCookie = authState.cookies?.find(cookie => cookie.name == 'orangehrm')
+        expect(orangeHrmCookie, 'The orangehrm cookie was not found in the saved auth state').toBeTruthy()
+
+        const cookieHeader = `orangehrm=${orangeHrmCookie?.value}`
+        const password = 'Password*123'
+        
+        const response = await request.post(
+            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users',
+            {
+                headers: {
+                    Cookie: cookieHeader,
+                    Accept: 'application/json'
+                },
+                data: {"username":"Admin","password":password,"status":true,"userRoleId":1,"empNumber":3}
+            }
+        )
+
+        expect(response.ok()).toBeFalsy()
+        expect(response.status()).toBe(422) 
+
+        const bodyJson = await response.json()
+        console.log('Error response:', JSON.stringify(await bodyJson))
+    });
+
     test('API - Get all users with invalid cookie should return Unauthorized', async ({ request }) => {
 
         // Arrange
