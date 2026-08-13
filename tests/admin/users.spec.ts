@@ -80,6 +80,66 @@ test.describe('Users section', () => {
         console.log(JSON.stringify(await bodyJson))
     });
 
+    test('API Create and Delete User by saved ID', async ({ request }) => {
+        const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
+
+        const authState = JSON.parse(await readFile(authFilePath, 'utf-8')) as {
+            cookies?: Array<{ name: string, value: string }>
+        }
+
+        const orangeHrmCookie = authState.cookies?.find(cookie => cookie.name == 'orangehrm')
+        expect(orangeHrmCookie, 'The orangehrm cookie was not found in the saved auth state').toBeTruthy()
+
+        const cookieHeader = `orangehrm=${orangeHrmCookie?.value}`
+        const username = 'apiuser' + crypto.randomUUID().slice(0, 8)
+        const password = 'Password*123'
+        const userPayload = {
+            username,
+            password,
+            status: true,
+            userRoleId: 1,
+            empNumber: 3
+        }
+
+        const createResponse = await request.post(
+            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users',
+            {
+                headers: {
+                    Cookie: cookieHeader,
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                data: userPayload
+            }
+        )
+
+        expect(createResponse.ok(), 'The user was not created successfully via API').toBeTruthy()
+
+        const createdUser = await createResponse.json()
+        const createdUserId = createdUser?.data?.id
+
+        expect(createdUserId, 'The created user ID was not returned in the create response').toBeDefined()
+
+        const deleteResponse = await request.delete(
+            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users',
+            {
+                headers: {
+                    Cookie: cookieHeader,
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                data: {
+                    ids: [createdUserId]
+                }
+            }
+        )
+
+        expect(deleteResponse.ok(), 'The user was not deleted successfully via API').toBeTruthy()
+
+        const deleteBody = await deleteResponse.json()
+        expect(deleteBody?.data).toContain(String(createdUserId))
+    });
+
     test('API Add New User with existing username should fail', async ({ page, request }) => {
 
         const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
