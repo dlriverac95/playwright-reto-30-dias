@@ -6,74 +6,32 @@ import { AddNewUserPage } from '../../pageobjects/AddNewUserPage';
 import { UserFactory } from '../../factory/UserFactory';
 import { UsersTable } from '../../components/UsersTable';
 import { readFile } from "fs/promises";
+import { UsersApiClient } from '../../api/UsersApiClient';
 import path from "path";
 
 
 test.describe('Users section', () => {
-    /*
-    test.beforeEach(async ({ page }) => {
-        const loginPage = new LoginPage(page)
-        await loginPage.loginAsAdmin()
-        const sidePanel = new SidePanel(page)
-        await expect(sidePanel.listOptions(SideMenuOption.ADMIN)).toBeVisible()
-    });
-    */
 
-    test('API Get All the users', async ({ page, request }) => {
+    test('API Get All the users', async ({ request }) => {
 
-        const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
-
-        const authState = JSON.parse(await readFile(authFilePath, 'utf-8')) as {
-            cookies?: Array<{ name: string, value: string }>
-        }
-
-        const orangeHrmCookie = authState.cookies?.find(cookie => cookie.name == 'orangehrm')
-        expect(orangeHrmCookie, 'The orangehrm cookie was not found in the saved auth state').toBeTruthy()
-
-        const cookieHeader = `orangehrm=${orangeHrmCookie?.value}`
-
-        const response = await request.get(
-            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users?limit=50&offset=0&sortField=u.userName&sortOrder=ASC',
-            {
-                headers: {
-                    Cookie: cookieHeader,
-                    Accept: 'application/json'
-                }
-            }
-        )
-
+        const apiClient = await UsersApiClient.fromSavedAuthState(request)
+        const response = await apiClient.getUsers()
         expect(response.ok()).toBeTruthy()
 
         const bodyJson = await response.json()
         console.log(JSON.stringify(await bodyJson))
     });
 
-    test('API Add New User', async ({ page, request }) => {
+    test('API Add New User', async ({ request }) => {
 
-        const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
-
-        const authState = JSON.parse(await readFile(authFilePath, 'utf-8')) as {
-            cookies?: Array<{ name: string, value: string }>
-        }
-
-        const orangeHrmCookie = authState.cookies?.find(cookie => cookie.name == 'orangehrm')
-        expect(orangeHrmCookie, 'The orangehrm cookie was not found in the saved auth state').toBeTruthy()
-
-        const cookieHeader = `orangehrm=${orangeHrmCookie?.value}`
-        const username = 'user' + crypto.randomUUID().slice(0, 8)
-        const password = 'Password*123'
-
-        const response = await request.post(
-            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users',
-            {
-                headers: {
-                    Cookie: cookieHeader,
-                    Accept: 'application/json'
-                },
-                data: {"username":username,"password":password,"status":true,"userRoleId":1,"empNumber":3}
-            }
-        )
-
+        const apiClient = await UsersApiClient.fromSavedAuthState(request)
+        const response = await apiClient.createUser({
+            username: 'apiuser' + crypto.randomUUID().slice(0, 8),
+            password: 'Password*123',
+            status: true,
+            userRoleId: 1,
+            empNumber: 3
+        })
         expect(response.ok()).toBeTruthy()
 
         const bodyJson = await response.json()
@@ -81,90 +39,36 @@ test.describe('Users section', () => {
     });
 
     test('API Create and Delete User by saved ID', async ({ request }) => {
-        const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
-
-        const authState = JSON.parse(await readFile(authFilePath, 'utf-8')) as {
-            cookies?: Array<{ name: string, value: string }>
-        }
-
-        const orangeHrmCookie = authState.cookies?.find(cookie => cookie.name == 'orangehrm')
-        expect(orangeHrmCookie, 'The orangehrm cookie was not found in the saved auth state').toBeTruthy()
-
-        const cookieHeader = `orangehrm=${orangeHrmCookie?.value}`
-        const username = 'apiuser' + crypto.randomUUID().slice(0, 8)
-        const password = 'Password*123'
-        const userPayload = {
-            username,
-            password,
+        const apiClient = await UsersApiClient.fromSavedAuthState(request)
+        const response = await apiClient.createUser({
+            username: 'apiuser' + crypto.randomUUID().slice(0, 8),
+            password: 'Password*123',
             status: true,
             userRoleId: 1,
             empNumber: 3
-        }
+        })
 
-        const createResponse = await request.post(
-            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users',
-            {
-                headers: {
-                    Cookie: cookieHeader,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                data: userPayload
-            }
-        )
-
-        expect(createResponse.ok(), 'The user was not created successfully via API').toBeTruthy()
-
-        const createdUser = await createResponse.json()
+        expect(response.ok(), 'The user was not created successfully via API').toBeTruthy()
+        const createdUser = await response.json()
         const createdUserId = createdUser?.data?.id
-
         expect(createdUserId, 'The created user ID was not returned in the create response').toBeDefined()
 
-        const deleteResponse = await request.delete(
-            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users',
-            {
-                headers: {
-                    Cookie: cookieHeader,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                data: {
-                    ids: [createdUserId]
-                }
-            }
-        )
-
+        const deleteResponse = await apiClient.deleteUsers(createdUserId)
         expect(deleteResponse.ok(), 'The user was not deleted successfully via API').toBeTruthy()
-
         const deleteBody = await deleteResponse.json()
         expect(deleteBody?.data).toContain(String(createdUserId))
     });
 
-    test('API Add New User with existing username should fail', async ({ page, request }) => {
+    test('API Add New User with existing username should fail', async ({ request }) => {
 
-        const authFilePath = path.resolve(process.cwd(), '.auth', 'admin.json')
-
-        const authState = JSON.parse(await readFile(authFilePath, 'utf-8')) as {
-            cookies?: Array<{ name: string, value: string }>
-        }
-
-        const orangeHrmCookie = authState.cookies?.find(cookie => cookie.name == 'orangehrm')
-        expect(orangeHrmCookie, 'The orangehrm cookie was not found in the saved auth state').toBeTruthy()
-
-        const cookieHeader = `orangehrm=${orangeHrmCookie?.value}`
-        const password = 'Password*123'
-        
-        const response = await request.post(
-            'https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users',
-            {
-                headers: {
-                    Cookie: cookieHeader,
-                    Accept: 'application/json'
-                },
-                data: {"username":"Admin","password":password,"status":true,"userRoleId":1,"empNumber":3}
-            }
-        )
-
+        const apiClient = await UsersApiClient.fromSavedAuthState(request)
+        const response = await apiClient.createUser({
+            username: 'Admin',
+            password: 'Password*123',
+            status: true,
+            userRoleId: 1,
+            empNumber: 3
+        })
         expect(response.ok()).toBeFalsy()
         expect(response.status()).toBe(422) 
 
